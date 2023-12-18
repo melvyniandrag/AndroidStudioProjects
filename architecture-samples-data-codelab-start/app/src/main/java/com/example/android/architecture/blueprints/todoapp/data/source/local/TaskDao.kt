@@ -15,3 +15,29 @@
  */
 
 package com.example.android.architecture.blueprints.todoapp.data.source.local
+
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.Upsert
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface TaskDao{
+    // reading functions are labeled observe and are not suspend functions. They return a flow that can be observed, so we dont have to wait for the result of polling a database for data changes.
+    @Query("SELECT * FROM task")
+    fun observeAll(): Flow<List<LocalTask>>
+
+
+    // writing functions are suspend because they do I/O
+    @Upsert
+    suspend fun upsert(task: LocalTask)
+
+    @Upsert
+    suspend fun upsertAll( tasks: List<LocalTask>)
+
+    @Query("UPDATE task SET isCompleted = :completed WHERE id = :taskId")
+    suspend fun updateCompleted(taskId: String, completed: Boolean)
+
+    @Query("DELETE FROM task")
+    suspend fun deleteAll()
+}
